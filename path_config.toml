@@ -1,0 +1,11 @@
+# Path file settings for E018 looper
+
+[settings]
+
+sleeptime = 5
+
+[paths]
+
+from_path = ""
+to_path = ""
+logfile = ""
