@@ -32,6 +32,11 @@ def process_loop(from_path, to_path, logfile, sleeptime):
                 shutil.copy(fullfilename, to_path)
                 c2 = get_checksum(to_path + file)
                 logger.info("Checksum of destination file: " + c2)
+                if not c1 == c2:
+                    logger.error(
+                        "Checksums do not match! Something is wrong. Aborting..."
+                    )
+                    exit()
 
 
 def put_into_logfile(filename, logfile):
