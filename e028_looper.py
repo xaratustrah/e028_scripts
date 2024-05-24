@@ -24,8 +24,9 @@ def process_loop(from_path, to_path, logfile, sleeptime):
     for file in os.listdir(from_path):
         fullfilename = os.path.join(from_path, file)
         if not already_copied(fullfilename, logfile):
+            logger.info(f"New file arrived: {file}")
             if ready_for_copy(fullfilename, sleeptime):
-                logger.success("File is ready for copy.")
+                logger.success(f"Ready to copy {file}")
                 put_into_logfile(fullfilename, logfile)
                 c1 = get_checksum(fullfilename)
                 logger.info("Checksum of source file: " + c1)
@@ -34,9 +35,11 @@ def process_loop(from_path, to_path, logfile, sleeptime):
                 logger.info("Checksum of destination file: " + c2)
                 if not c1 == c2:
                     logger.error(
-                        "Checksums do not match! Something is wrong. Aborting..."
+                        f"Checksums do not match for {file}! Something is wrong. Aborting..."
                     )
                     exit()
+                else:
+                    logger.success(f"Checksums match for {file}. Continuing.")
 
 
 def put_into_logfile(filename, logfile):
