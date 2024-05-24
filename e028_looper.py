@@ -14,6 +14,8 @@ import time
 from loguru import logger
 import shutil
 import toml
+import hashlib
+
 
 def process_loop(from_path, to_path, logfile, sleeptime):
     """
@@ -23,8 +25,13 @@ def process_loop(from_path, to_path, logfile, sleeptime):
         fullfilename = os.path.join(from_path, file)
         if not already_copied(fullfilename, logfile):
             if ready_for_copy(fullfilename, sleeptime):
+                logger.success("File is ready for copy.")
                 put_into_logfile(fullfilename, logfile)
+                c1 = get_checksum(fullfilename)
+                logger.info("Checksum of source file: " + c1)
                 shutil.copy(fullfilename, to_path)
+                c2 = get_checksum(to_path + file)
+                logger.info("Checksum of destination file: " + c2)
 
 
 def put_into_logfile(filename, logfile):
@@ -55,8 +62,9 @@ def already_copied(filename, logfile):
 
     return already_copied
 
+
 def ready_for_copy(filename, sleeptime):
-    logger.info('Checking whether file is ready for copy...')
+    logger.info("Checking whether file is ready for copy...")
     is_ready = False
     try:
         s1 = os.path.getsize(filename)
@@ -71,7 +79,16 @@ def ready_for_copy(filename, sleeptime):
     return is_ready
 
 
+def get_checksum(filename):
+    with open(filename, "rb") as f:
+        d = f.read()
+        hsh = hashlib.md5(d).hexdigest()
+
+    return hsh
+
+
 # ----
+
 
 def main():
     scriptname = "e028_looper"
@@ -105,7 +122,7 @@ def main():
             config_dic = toml.load(args.config[0])
             # check structure of calibration file
             print(config_dic)
-            for key in ["from_path", "to_path", 'logfile']:
+            for key in ["from_path", "to_path", "logfile"]:
                 assert key in config_dic["paths"].keys()
             for key in ["sleeptime"]:
                 assert key in config_dic["settings"].keys()
@@ -120,7 +137,6 @@ def main():
         from_path = config_dic["paths"]["from_path"]
         to_path = config_dic["paths"]["to_path"]
         logfile = config_dic["paths"]["logfile"]
-
 
     else:
         logger.error("No Config file provided. Aborting...")
